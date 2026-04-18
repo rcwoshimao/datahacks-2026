@@ -4,7 +4,7 @@ function App() {
   return (
     <main className="page">
       <header className="hero">
-        <h1>datahacks-2026</h1>
+        <h1>datahacks-2026-environmental-challenges</h1>
         <p className="subtitle">
           A simple React frontend scaffolded with Vite.
         </p>

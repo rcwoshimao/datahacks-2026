@@ -1,0 +1,22 @@
+# macOS
+.DS_Store
+
+# Node / Vite
+**/node_modules/
+**/dist/
+**/dist-ssr/
+**/*.local
+
+# Logs
+**/logs
+**/*.log
+
+# Env files (keep examples)
+.env
+.env.*
+!.env.example
+
+# Editors
+.vscode/*
+!.vscode/extensions.json
+.idea/

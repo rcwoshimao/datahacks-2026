@@ -22,9 +22,9 @@
   width: min(760px, 100%);
   margin: 0 auto;
   padding: 20px 18px;
-  border: 1px solid var(--border);
+  border: 1px solid rgba(0, 0, 0, 0.16);
   border-radius: 12px;
-  background: color-mix(in srgb, var(--bg), transparent 0%);
+  background: #ffffff;
   text-align: left;
 }
 

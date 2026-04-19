@@ -41,15 +41,6 @@ function scoreToT(score) {
   return clamp01((s - 55) / 40)
 }
 
-function readCssVar(name, fallback) {
-  try {
-    const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim()
-    return v || fallback
-  } catch {
-    return fallback
-  }
-}
-
 function FitToSelectedZip({ selectedZip, boundaries }) {
   const map = useMap()
 
@@ -138,9 +129,9 @@ export default function MapPage() {
   }, [])
 
   const boundaryStyle = useMemo(() => {
-    const lowFill = readCssVar('--map-fill-low', '#16a34a')
-    const highFill = readCssVar('--map-fill-high', '#facc15')
-    const stroke = readCssVar('--map-stroke', '#000000')
+    const lowFill = '#16a34a'
+    const highFill = '#facc15'
+    const stroke = '#000000'
 
     return (feature, opts = {}) => {
       const p = feature?.properties ?? {}
@@ -183,7 +174,7 @@ export default function MapPage() {
 
   const selectedStyle = useMemo(
     () => ({
-      color: readCssVar('--map-selected-stroke', '#ef4444'),
+      color: '#ef4444',
       weight: 3,
       opacity: 0.95,
       fillOpacity: 0.08,

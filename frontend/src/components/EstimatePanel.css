@@ -1,10 +1,8 @@
 .estimatePanel {
   padding: 12px;
-  /* border: 1px solid var(--app-border);
-  border-radius: 12px; */
-  background: color-mix(in srgb, var(--app-surface), transparent 6%);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
-  box-shadow: var(--app-shadow);
+  box-shadow: rgba(0, 0, 0, 0.14) 0 8px 18px -10px;
   display: grid;
   gap: 12px;
   width: min(520px, calc(100vw - 24px));
@@ -12,36 +10,25 @@
 
 .estimateDrawerOverlay {
   position: fixed;
-  inset: var(--app-navbar-height, 56px) 0 0 0;
+  inset: 56px 0 0 0;
   z-index: 1990;
   /* border: 0; */
   padding: 0;
   margin: 0;
   width: 100%;
   height: 100%;
-  background: var(--app-overlay);
+  background: rgba(0, 0, 0, 0.35);
 }
 
 .estimateDrawer {
   position: fixed;
-  top: var(--app-navbar-height, 56px);
+  top: 56px;
   right: 0;
   bottom: 0;
   z-index: 2001;
   width: min(520px, 92vw);
-  color: black !important; 
-  /* Drawer palette overrides (scoped) */
-  --app-surface: var(--deep-space-blue);
-  --app-surface-2: color-mix(in srgb, var(--deep-space-blue), var(--steel-blue) 20%);
-  --app-text: var(--papaya-whip);
-  --app-text-muted: color-mix(in srgb, var(--papaya-whip), transparent 32%);
-  --app-border: color-mix(in srgb, var(--steel-blue), transparent 55%);
-  --app-border-subtle: color-mix(in srgb, var(--steel-blue), transparent 72%);
-  --app-shadow: rgba(0, 0, 0, 0.38) 0 22px 50px -28px;
-
-  background: var(--papaya-whip);
+  background: #ffffff;
   backdrop-filter: blur(12px);
-  /* border-left: 1px solid var(--app-border-subtle); */
   transform: translateX(110%);
   transition: transform 180ms ease;
   display: flex;
@@ -58,7 +45,6 @@
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  /* border-bottom: 1px solid var(--app-border-subtle); */
 }
 
 .estimateDrawerHeaderLeft {
@@ -70,14 +56,12 @@
 .estimateDrawerTitle {
   font-size: 13px;
   font-weight: 700;
-  color: var(--app-text);
   letter-spacing: 0.02em;
   text-transform: uppercase;
 }
 
 .estimateDrawerSub {
   font-size: 12px;
-  color: var(--app-text-muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -85,22 +69,19 @@
 
 .estimateDrawerZip {
   font-weight: 750;
-  color: var(--app-text);
 }
 
 .estimateDrawerClose {
   appearance: none;
-  /* border: 1px solid var(--app-border); */
   border-radius: 999px;
   padding: 8px 12px;
   font: inherit;
-  color: var(--app-text);
-  background: color-mix(in srgb, var(--app-surface), transparent 12%);
+  background: rgba(0, 0, 0, 0.06);
   cursor: pointer;
 }
 
 .estimateDrawerClose:hover {
-  background: color-mix(in srgb, var(--app-surface-2), transparent 4%);
+  background: rgba(0, 0, 0, 0.1);
 }
 
 .estimateDrawerScroll {
@@ -121,58 +102,54 @@
 }
 
 .estimateDrawer :where(.estimateCardTitle, .estimateCardValue, .estimateFeatureValue, .estimatePillValue) {
-  color: var(--app-text);
+  color: inherit;
 }
 
 .estimateDrawer :where(.estimateCardSubtitle, .estimateFeatureLabel, .estimatePillLabel, .estimateSectionTitle, .estimateBigNumberLabel) {
-  color: var(--app-text-muted);
+  color: inherit;
 }
 
 .estimateLabel {
   text-align: left;
   font-size: 14px;
-  color: var(--app-text);
 }
 
 .estimateInput {
   width: 100%;
   box-sizing: border-box;
   padding: 10px 12px;
-  /* border: 1px solid var(--app-border); */
   border-radius: 10px;
   font: inherit;
-  color: var(--app-text);
-  background: color-mix(in srgb, var(--app-surface), transparent 2%);
+  background: rgba(0, 0, 0, 0.04);
   outline: none;
   min-width: 0;
 }
 
 .estimateInput::placeholder {
-  color: color-mix(in srgb, var(--app-text), transparent 45%);
+  color: inherit;
 }
 
 .estimateInput:focus {
-  border-color: color-mix(in srgb, var(--app-text), transparent 55%);
+  outline: 2px solid rgba(0, 0, 0, 0.25);
+  outline-offset: 2px;
 }
 
 .estimateButton {
   appearance: none;
-  /* border: 1px solid var(--app-border); */
   border-radius: 10px;
   padding: 10px 12px;
   font: inherit;
-  color: var(--app-text);
-  background: var(--app-surface);
+  background: rgba(0, 0, 0, 0.06);
   cursor: pointer;
   white-space: nowrap;
 }
 
 .estimateButton.secondary {
-  background: color-mix(in srgb, var(--app-surface-2), transparent 6%);
+  background: rgba(0, 0, 0, 0.04);
 }
 
 .estimateButton:hover {
-  background: var(--app-surface-2);
+  background: rgba(0, 0, 0, 0.1);
 }
 
 .estimateButton:active {
@@ -183,13 +160,11 @@
   margin-top: 8px;
   font-size: 12px;
   line-height: 1.35;
-  color: var(--app-danger);
 }
 
 .estimateHero {
   border-radius: 14px;
   padding: 14px 14px 12px;
-  /* border: 1px solid var(--app-border-subtle); */
   background: inherit;
 }
 
@@ -202,13 +177,11 @@
   font-size: 44px;
   font-weight: 750;
   letter-spacing: -0.02em;
-  color: var(--app-text);
   line-height: 1.05;
 }
 
 .estimateBigNumberLabel {
   font-size: 12px;
-  color: var(--app-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
@@ -225,8 +198,7 @@
 }
 
 .estimatePill {
-  /* border: 1px solid var(--app-border-subtle); */
-  background: var(--molten-lava);
+  background: rgba(0, 0, 0, 0.04);
   border-radius: 12px;
   padding: 10px 12px;
   display: grid;
@@ -235,14 +207,12 @@
 
 .estimatePillLabel {
   font-size: 11px;
-  color: var(--app-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
 
 .estimatePillValue {
   font-size: 13px;
-  color: var(--app-text);
   line-height: 1.25;
 }
 
@@ -253,7 +223,6 @@
 
 .estimateSectionTitle {
   font-size: 12px;
-  color: var(--app-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
@@ -265,9 +234,8 @@
 }
 
 .estimateCard {
-  /* border: 1px solid var(--app-border); */
   border-radius: 14px;
-  background: var(--app-surface-2);
+  background: rgba(0, 0, 0, 0.04);
   overflow: hidden;
 }
 
@@ -284,25 +252,21 @@
 .estimateCardTitle {
   font-size: 13px;
   font-weight: 650;
-  color: var(--app-text);
   text-transform: lowercase;
 }
 
 .estimateCardSubtitle {
   font-size: 12px;
-  color: var(--app-text-muted);
 }
 
 .estimateCardValue {
   margin-top: 6px;
   font-size: 16px;
   font-weight: 700;
-  color: var(--app-text);
 }
 
 .estimateCardBody {
   padding: 10px 12px 12px;
-  /* border-top: 1px solid var(--app-border-subtle); */
 }
 
 .estimateChart {
@@ -316,7 +280,6 @@
   flex-wrap: wrap;
   gap: 10px 14px;
   font-size: 12px;
-  color: var(--app-text-muted);
 }
 
 .estimateLegendItem {
@@ -344,10 +307,9 @@
   top: 34px;
   transform: translateX(-50%);
   z-index: 5;
-  background: var(--app-surface-2);
-  /* border: 1px solid var(--app-border); */
+  background: rgba(255, 255, 255, 0.98);
   border-radius: 12px;
-  box-shadow: var(--app-shadow);
+  box-shadow: rgba(0, 0, 0, 0.14) 0 8px 18px -10px;
   padding: 10px 10px 9px;
   min-width: 170px;
   max-width: 240px;
@@ -359,7 +321,6 @@
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--app-text-muted);
   margin-bottom: 6px;
 }
 
@@ -369,7 +330,6 @@
   align-items: center;
   gap: 8px;
   font-size: 12px;
-  color: color-mix(in srgb, var(--app-text), transparent 18%);
   margin-top: 4px;
 }
 
@@ -387,7 +347,6 @@
 
 .estimateTooltipValue {
   font-weight: 750;
-  color: var(--app-text);
 }
 
 .estimateChartSvg {
@@ -395,7 +354,6 @@
   height: 130px;
   display: block;
   background: #ffffff;
-  /* border: 1px solid var(--app-border-subtle); */
   border-radius: 12px;
 }
 
@@ -409,7 +367,6 @@
   display: grid;
   gap: 4px;
   font-size: 12px;
-  color: color-mix(in srgb, var(--app-text), transparent 22%);
 }
 
 .estimateChartMetaRow {
@@ -420,12 +377,11 @@
 }
 
 .estimateChartMetaKey {
-  color: var(--app-text-muted);
+  color: inherit;
 }
 
 .estimateChartMetaVal {
   font-weight: 650;
-  color: var(--app-text);
 }
 
 .estimateFeatureGrid {
@@ -435,9 +391,8 @@
 }
 
 .estimateFeature {
-  /* border: 1px solid var(--app-border-subtle); */
   border-radius: 12px;
-  background: var(--app-surface-2);
+  background: rgba(0, 0, 0, 0.04);
   padding: 10px 12px;
   display: grid;
   gap: 3px;
@@ -445,19 +400,16 @@
 
 .estimateFeatureLabel {
   font-size: 11px;
-  color: var(--app-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
 
 .estimateFeatureValue {
   font-size: 13px;
-  color: var(--app-text);
   font-weight: 650;
 }
 
 .estimateZipFooter {
-  /* border-top: 1px solid var(--app-border-subtle); */
   padding-top: 10px;
   display: grid;
   gap: 8px;
@@ -465,7 +417,6 @@
 
 .estimateZipSubheader {
   font-size: 12px;
-  color: var(--app-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }

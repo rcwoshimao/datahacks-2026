@@ -384,6 +384,19 @@
   font-weight: 650;
 }
 
+.estimatePlotlyWrap {
+  width: 100%;
+  position: relative;
+}
+
+.estimatePlotlyEmpty {
+  height: 130px;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  opacity: 0.9;
+}
+
 .estimateFeatureGrid {
   display: grid;
   grid-template-columns: 1fr;

@@ -47,3 +47,23 @@
   height: 100%;
 }
 
+.leaflet-tooltip.zipScoreLabel {
+  background: transparent;
+  color: rgba(0, 0, 0, 0.85);
+  border: 0;
+  box-shadow: none;
+  padding: 0;
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: 0.01em;
+  pointer-events: none;
+  text-align: center;
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9),
+    0 0 6px rgba(255, 255, 255, 0.75);
+}
+
+.leaflet-tooltip.zipScoreLabel::before {
+  display: none;
+}
+

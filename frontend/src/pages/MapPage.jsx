@@ -3,6 +3,7 @@ import EstimatePanel from '../components/EstimatePanel.jsx'
 import { useEffect, useMemo, useState } from 'react'
 import L from 'leaflet'
 import './MapPage.css'
+import solarScoresCsv from '../../../data/solar_opportunity/solar_opportunity_scores_2025.csv?raw'
 
 const SAN_DIEGO = [32.7157, -117.1611]
 const ZIPCODE_GEOJSON_URL = '/api/zipcode_geojson?limit=200'
@@ -97,6 +98,103 @@ function boostHexSaturation(hex, factor) {
   const boosted = clamp01(s * factor)
   const out = hslToRgb(h, boosted, l)
   return `#${toHexByte(out.r)}${toHexByte(out.g)}${toHexByte(out.b)}`
+}
+
+function normalizeZipString(value) {
+  const s = String(value ?? '').trim()
+  if (!s) return ''
+  const digits = s.replace(/\D/g, '')
+  if (!digits) return s
+  return digits.padStart(5, '0')
+}
+
+function getZipFromProperties(p) {
+  const z = p?.zip ?? p?.zipcode ?? p?.ZIP ?? p?.postal_code ?? p?.zip_code
+  return normalizeZipString(z)
+}
+
+function parseSolarScoresByZip(csvText) {
+  const text = String(csvText || '').trim()
+  if (!text) return new Map()
+
+  const lines = text.split(/\r?\n/)
+  if (lines.length < 2) return new Map()
+
+  const header = lines[0].split(',')
+  const idxZip = header.indexOf('zip_code')
+  const idxYear = header.indexOf('year')
+  const idxQuarter = header.indexOf('quarter')
+  const idxSector = header.indexOf('sector')
+  const idxScore = header.indexOf('opportunity_score')
+  if (idxZip === -1 || idxYear === -1 || idxQuarter === -1 || idxSector === -1 || idxScore === -1) {
+    return new Map()
+  }
+
+  // Keep latest (year, quarter) per zip for Residential sector (r).
+  const bestByZip = new Map()
+
+  for (let i = 1; i < lines.length; i++) {
+    const row = lines[i]
+    if (!row) continue
+    const cols = row.split(',')
+    const zip = normalizeZipString(cols[idxZip])
+    const sector = String(cols[idxSector] || '').trim().toLowerCase()
+    const year = Number(cols[idxYear])
+    const quarter = Number(cols[idxQuarter])
+    const score = Number.parseFloat(cols[idxScore])
+
+    if (!zip || sector !== 'r' || !Number.isFinite(year) || !Number.isFinite(quarter) || !Number.isFinite(score)) {
+      continue
+    }
+
+    const cur = bestByZip.get(zip)
+    if (!cur || year > cur.year || (year === cur.year && quarter > cur.quarter)) {
+      bestByZip.set(zip, { year, quarter, score })
+    } else if (year === cur.year && quarter === cur.quarter && score > cur.score) {
+      bestByZip.set(zip, { year, quarter, score })
+    }
+  }
+
+  const byZip = new Map()
+  for (const [zip, v] of bestByZip.entries()) {
+    byZip.set(zip, { residential: v.score })
+  }
+
+  return byZip
+}
+
+const SOLAR_SCORES_BY_ZIP = parseSolarScoresByZip(solarScoresCsv)
+
+function formatOpportunityScoreNumber(score) {
+  const n = Number(score)
+  if (!Number.isFinite(n)) return ''
+  return String(Math.round(n * 100))
+}
+
+function clamp(n, min, max) {
+  return Math.max(min, Math.min(max, n))
+}
+
+function estimateLayerSizeScore(layer) {
+  // Approximate size from geographic bounds (good enough for relative font sizing).
+  try {
+    const b = layer?.getBounds?.()
+    if (!b) return 0
+    const latSpan = Math.max(0, b.getNorth() - b.getSouth())
+    const lngSpan = Math.max(0, b.getEast() - b.getWest())
+    const a = latSpan * lngSpan
+    if (!Number.isFinite(a) || a <= 0) return 0
+    // sqrt compresses range; scaled to a ~0..1-ish score for typical zip polygons.
+    return Math.sqrt(a) * 120
+  } catch {
+    return 0
+  }
+}
+
+function fontSizePxForLayer(layer) {
+  // Smaller polygons -> smaller text, larger polygons -> larger text.
+  const s = estimateLayerSizeScore(layer)
+  return clamp(8 + s, 8, 16)
 }
 
 function scoreToT(score) {
@@ -217,12 +315,37 @@ export default function MapPage() {
 
   const onEachBoundary = useMemo(() => {
     return (feature, layer) => {
+      // Always-visible label (no click required): Residential opportunity score.
+      try {
+        const p = feature?.properties ?? {}
+        const z = getZipFromProperties(p)
+        if (z) {
+          const scores = SOLAR_SCORES_BY_ZIP.get(z)
+          const r = formatOpportunityScoreNumber(scores?.residential)
+          if (r) {
+            const fontPx = fontSizePxForLayer(layer)
+            const label = `<div style="font-size:${fontPx}px">${r}</div>`
+            layer.bindTooltip(label, {
+              permanent: true,
+              direction: 'center',
+              className: 'zipScoreLabel',
+              opacity: 1,
+            })
+
+            const center = layer?.getBounds?.()?.getCenter?.()
+            if (center) layer.openTooltip(center)
+            else layer.openTooltip()
+          }
+        }
+      } catch {
+        // ignore label errors
+      }
+
       layer.on('click', () => {
         const p = feature?.properties ?? {}
-        const z = p.zip ?? p.zipcode ?? p.ZIP ?? p.postal_code
+        const z = getZipFromProperties(p)
         if (!z) return
-        const normalized = String(z).trim()
-        setSelectedZip(normalized)
+        setSelectedZip(z)
         setDrawerOpen(true)
         setAutoZoomEnabled(false)
       })
@@ -253,8 +376,8 @@ export default function MapPage() {
 
     const matches = boundaries.features.filter((f) => {
       const p = f?.properties ?? {}
-      const z = p.zip ?? p.zipcode ?? p.ZIP ?? p.postal_code
-      return z != null && String(z).trim() === normalized
+      const z = getZipFromProperties(p)
+      return z && z === normalized
     })
 
     if (!matches.length) return null
@@ -267,9 +390,9 @@ export default function MapPage() {
     if (!Array.isArray(feats)) return map
     for (const f of feats) {
       const p = f?.properties ?? {}
-      const z = p.zip ?? p.zipcode ?? p.ZIP ?? p.postal_code
+      const z = getZipFromProperties(p)
       if (!z) continue
-      map[String(z).trim()] = {
+      map[z] = {
         optimalityScore: p.optimalityScore,
       }
     }

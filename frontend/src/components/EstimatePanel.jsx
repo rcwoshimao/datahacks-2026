@@ -1,6 +1,12 @@
 import './EstimatePanel.css'
 import { useEffect, useMemo, useState } from 'react'
 import co2CostCsvRaw from '../../../data/co2_cost/co2_emissions_cost_electricity.csv?raw'
+import Plotly from 'plotly.js-dist-min'
+import createPlotlyComponentModule from 'react-plotly.js/factory'
+
+const createPlotlyComponent = createPlotlyComponentModule?.default ?? createPlotlyComponentModule
+const PlotlyLib = Plotly?.default ?? Plotly
+const Plot = createPlotlyComponent(PlotlyLib)
 
 export default function EstimatePanel({
   onEstimate,
@@ -183,14 +189,18 @@ export default function EstimatePanel({
                   }
                   className="estimateCardFull"
                 >
-                  <DualLineChart
+                  <PlotlyDualLineChart
                     seriesA={estimate.costWithSolar}
                     seriesB={estimate.costWithoutSolar}
                     labelA="with solar"
                     labelB="without solar"
                     colorA="#16a34a"
                     colorB="#ef4444"
-                    unitFormatter={(v) => formatCurrency(v)}
+                    yAxisTitle="USD / quarter"
+                    yAxisTickPrefix="$"
+                    yAxisTickFormat=",.0f"
+                    hoverA={(v) => formatCurrency(v)}
+                    hoverB={(v) => formatCurrency(v)}
                   />
                 </ChartCard>
 
@@ -206,21 +216,25 @@ export default function EstimatePanel({
                   }
                   className="estimateCardFull"
                 >
-                  <DualLineChart
+                  <PlotlyDualLineChart
                     seriesA={estimate.emissionsWithSolar}
                     seriesB={estimate.emissionsWithoutSolar}
                     labelA="with solar"
                     labelB="without solar"
                     colorA="#0ea5e9"
                     colorB="#a855f7"
-                    unitFormatter={(v) => formatTons(v)}
+                    yAxisTitle="Tons CO₂e / quarter"
+                    yAxisTickSuffix=" t"
+                    yAxisTickFormat=","
+                    hoverA={(v) => `${roundTo(v, 2)} t`}
+                    hoverB={(v) => `${roundTo(v, 2)} t`}
                   />
                 </ChartCard>
               </div>
             </div>
 
             <div className="estimateSection">
-              <div className="estimateSectionTitle">other features (mocked)</div>
+              <div className="estimateSectionTitle">other features</div>
               <div className="estimateFeatureGrid">
                 {estimate.features.map((f) => (
                   <div key={f.label} className="estimateFeature">
@@ -592,6 +606,104 @@ function buildFakeEstimate(zip) {
     tenYearNetSavingsUsd,
     features,
   }
+}
+
+function PlotlyDualLineChart({
+  seriesA,
+  seriesB,
+  labelA,
+  labelB,
+  colorA,
+  colorB,
+  yAxisTitle = '',
+  yAxisTickPrefix = '',
+  yAxisTickSuffix = '',
+  yAxisTickFormat = '',
+  hoverA = (v) => String(v ?? ''),
+  hoverB = (v) => String(v ?? ''),
+}) {
+  const a = Array.isArray(seriesA) ? seriesA : []
+  const b = Array.isArray(seriesB) ? seriesB : []
+
+  // Quarterly data uses string labels like "2026 Q1" stored in `year`.
+  const n = Math.max(a.length, b.length)
+  const x = Array.from({ length: n }, (_, i) => a[i]?.year ?? b[i]?.year ?? '')
+  const yA = Array.from({ length: n }, (_, i) => (Number.isFinite(a[i]?.value) ? a[i].value : null))
+  const yB = Array.from({ length: n }, (_, i) => (Number.isFinite(b[i]?.value) ? b[i].value : null))
+
+  const hasData = x.length >= 2 && (yA.some((v) => v != null) || yB.some((v) => v != null))
+
+  return (
+    <div className="estimatePlotlyWrap">
+      {hasData ? (
+        <Plot
+          data={[
+            {
+              type: 'scatter',
+              mode: 'lines+markers',
+              name: labelA,
+              x,
+              y: yA,
+              line: { color: colorA, width: 3 },
+              marker: { color: colorA, size: 6 },
+              hovertemplate: `%{x}<br>${labelA}: %{customdata}<extra></extra>`,
+              customdata: yA.map((v) => (v == null ? '—' : hoverA(v))),
+            },
+            {
+              type: 'scatter',
+              mode: 'lines+markers',
+              name: labelB,
+              x,
+              y: yB,
+              line: { color: colorB, width: 3 },
+              marker: { color: colorB, size: 6 },
+              hovertemplate: `%{x}<br>${labelB}: %{customdata}<extra></extra>`,
+              customdata: yB.map((v) => (v == null ? '—' : hoverB(v))),
+            },
+          ]}
+          layout={{
+            autosize: true,
+            height: 210,
+            margin: { l: 56, r: 18, t: 10, b: 64 },
+            paper_bgcolor: 'rgba(0,0,0,0)',
+            plot_bgcolor: 'rgba(0,0,0,0)',
+            hovermode: 'x unified',
+            legend: {
+              orientation: 'h',
+              x: 0,
+              y: 1.18,
+              font: { size: 12 },
+            },
+            xaxis: {
+              type: 'category',
+              title: { text: 'Quarter', standoff: 10, font: { size: 12 } },
+              tickangle: -35,
+              automargin: true,
+              gridcolor: 'rgba(0,0,0,0.08)',
+              zerolinecolor: 'rgba(0,0,0,0.12)',
+            },
+            yaxis: {
+              title: { text: yAxisTitle, font: { size: 12 } },
+              tickprefix: yAxisTickPrefix,
+              ticksuffix: yAxisTickSuffix,
+              tickformat: yAxisTickFormat || undefined,
+              automargin: true,
+              gridcolor: 'rgba(0,0,0,0.08)',
+              zerolinecolor: 'rgba(0,0,0,0.12)',
+            },
+          }}
+          config={{
+            displayModeBar: false,
+            responsive: true,
+          }}
+          style={{ width: '100%', height: '210px' }}
+          useResizeHandler
+        />
+      ) : (
+        <div className="estimatePlotlyEmpty">No quarterly data available for this ZIP.</div>
+      )}
+    </div>
+  )
 }
 
 let _co2CostIndex = null

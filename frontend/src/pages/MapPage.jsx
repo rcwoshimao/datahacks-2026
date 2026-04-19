@@ -6,8 +6,11 @@ import './MapPage.css'
 import solarScoresCsv from '../../../data/solar_opportunity/solar_opportunity_scores_2025.csv?raw'
 
 const SAN_DIEGO = [32.7157, -117.1611]
-const ZIPCODE_GEOJSON_URL = '/api/zipcode_geojson?limit=200'
-const ZIPCODE_CACHE_KEY = `zipcode_geojson_cache_v1:${ZIPCODE_GEOJSON_URL}`
+// Static snapshot shipped in `frontend/public/`. Regenerate with:
+//   curl -s 'http://localhost:8000/api/zipcode_geojson?limit=200' \
+//     -o frontend/public/zipcode_geojson.json
+const ZIPCODE_GEOJSON_URL = '/zipcode_geojson.json'
+const ZIPCODE_CACHE_KEY = `zipcode_geojson_cache_v2:${ZIPCODE_GEOJSON_URL}`
 const ZIPCODE_CACHE_TTL_MS = 1000 * 60 * 60 * 24 // 24h
 
 function clamp01(n) {

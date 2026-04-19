@@ -35,6 +35,70 @@ function lerpColor(hexA, hexB, t) {
   return `#${toHexByte(lerp(ar, br, t))}${toHexByte(lerp(ag, bg, t))}${toHexByte(lerp(ab, bb, t))}`
 }
 
+function rgbToHsl(r, g, b) {
+  const rn = r / 255
+  const gn = g / 255
+  const bn = b / 255
+  const max = Math.max(rn, gn, bn)
+  const min = Math.min(rn, gn, bn)
+  const d = max - min
+  const l = (max + min) / 2
+  let h = 0
+  let s = 0
+
+  if (d !== 0) {
+    s = d / (1 - Math.abs(2 * l - 1))
+    switch (max) {
+      case rn:
+        h = ((gn - bn) / d + (gn < bn ? 6 : 0)) * 60
+        break
+      case gn:
+        h = ((bn - rn) / d + 2) * 60
+        break
+      default:
+        h = ((rn - gn) / d + 4) * 60
+        break
+    }
+  }
+
+  return { h, s, l }
+}
+
+function hslToRgb(h, s, l) {
+  const c = (1 - Math.abs(2 * l - 1)) * s
+  const hp = ((h % 360) + 360) % 360 / 60
+  const x = c * (1 - Math.abs((hp % 2) - 1))
+  let r1 = 0
+  let g1 = 0
+  let b1 = 0
+
+  if (hp >= 0 && hp < 1) [r1, g1, b1] = [c, x, 0]
+  else if (hp >= 1 && hp < 2) [r1, g1, b1] = [x, c, 0]
+  else if (hp >= 2 && hp < 3) [r1, g1, b1] = [0, c, x]
+  else if (hp >= 3 && hp < 4) [r1, g1, b1] = [0, x, c]
+  else if (hp >= 4 && hp < 5) [r1, g1, b1] = [x, 0, c]
+  else [r1, g1, b1] = [c, 0, x]
+
+  const m = l - c / 2
+  return {
+    r: Math.round((r1 + m) * 255),
+    g: Math.round((g1 + m) * 255),
+    b: Math.round((b1 + m) * 255),
+  }
+}
+
+function boostHexSaturation(hex, factor) {
+  const raw = String(hex).trim().replace('#', '')
+  if (!/^[0-9a-fA-F]{6}$/.test(raw)) return hex
+  const r = Number.parseInt(raw.slice(0, 2), 16)
+  const g = Number.parseInt(raw.slice(2, 4), 16)
+  const b = Number.parseInt(raw.slice(4, 6), 16)
+  const { h, s, l } = rgbToHsl(r, g, b)
+  const boosted = clamp01(s * factor)
+  const out = hslToRgb(h, boosted, l)
+  return `#${toHexByte(out.r)}${toHexByte(out.g)}${toHexByte(out.b)}`
+}
+
 function scoreToT(score) {
   // backend generates 55..95 (but clamp anyway)
   const s = Number(score)
@@ -129,15 +193,16 @@ export default function MapPage() {
   }, [])
 
   const boundaryStyle = useMemo(() => {
-    const lowFill = '#16a34a'
-    const highFill = '#facc15'
+    const lowFill = '#bbd0ff'
+    const highFill = '#d4153b'
     const stroke = '#000000'
+    const saturationBoost = 10.0
 
     return (feature, opts = {}) => {
       const p = feature?.properties ?? {}
       const t = scoreToT(p.optimalityScore)
-      const fillColor = lerpColor(lowFill, highFill, t)
-      const baseFillOpacity = lerp(0.12, 0.45, t)
+      const fillColor = boostHexSaturation(lerpColor(lowFill, highFill, t), saturationBoost)
+      const baseFillOpacity = lerp(0.28, 0.72, t)
       const hoverBoost = opts.hover ? 0.06 : 0
 
       return {

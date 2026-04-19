@@ -27,7 +27,7 @@
   bottom: 0;
   z-index: 2001;
   width: min(520px, 92vw);
-  background: #ffffff;
+  background: #c8b6ff;
   backdrop-filter: blur(12px);
   transform: translateX(110%);
   transition: transform 180ms ease;
@@ -198,7 +198,7 @@
 }
 
 .estimatePill {
-  background: rgba(0, 0, 0, 0.04);
+  background: #ffd6ff;
   border-radius: 12px;
   padding: 10px 12px;
   display: grid;
@@ -235,7 +235,7 @@
 
 .estimateCard {
   border-radius: 14px;
-  background: rgba(0, 0, 0, 0.04);
+  background: #ffd6ff;
   overflow: hidden;
 }
 
@@ -307,7 +307,7 @@
   top: 34px;
   transform: translateX(-50%);
   z-index: 5;
-  background: rgba(255, 255, 255, 0.98);
+  background: #ffd6ff;
   border-radius: 12px;
   box-shadow: rgba(0, 0, 0, 0.14) 0 8px 18px -10px;
   padding: 10px 10px 9px;
@@ -392,7 +392,7 @@
 
 .estimateFeature {
   border-radius: 12px;
-  background: rgba(0, 0, 0, 0.04);
+  background: #ffd6ff;
   padding: 10px 12px;
   display: grid;
   gap: 3px;

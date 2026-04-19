@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import csv
 import json
 import os
+from pathlib import Path
+from threading import Lock
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
@@ -53,6 +56,171 @@ def databricks_sql(req: SqlRequest):
         }
     except Exception as e:  # noqa: BLE001 - surface a clean message to client
         raise HTTPException(status_code=500, detail=str(e)) from e
+
+
+_CO2_COST_LOCK = Lock()
+_CO2_COST_BY_ZIP: dict[str, dict[str, dict[int, dict[str, float]]]] | None = None
+_CO2_COST_SOURCE_PATH: str | None = None
+_CO2_COST_SOURCE_MTIME: float | None = None
+
+
+def _repo_root() -> Path:
+    # backend/app/main.py -> backend/app -> backend -> repo root
+    return Path(__file__).resolve().parents[2]
+
+
+def _co2_cost_csv_path() -> Path:
+    raw = (os.getenv("CO2_COST_CSV_PATH") or "").strip()
+    if raw:
+        return Path(raw).expanduser().resolve()
+    return _repo_root() / "data" / "co2_cost" / "co2_emissions_cost_electricity.csv"
+
+
+def _to_int(value) -> int | None:
+    try:
+        if value is None:
+            return None
+        s = str(value).strip()
+        if not s:
+            return None
+        return int(float(s))
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def _to_float(value) -> float | None:
+    try:
+        if value is None:
+            return None
+        s = str(value).strip()
+        if not s:
+            return None
+        return float(s)
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def _load_co2_cost_index() -> tuple[dict[str, dict[str, dict[int, dict[str, float]]]], str]:
+    """
+    Loads and indexes `co2_emissions_cost_electricity.csv` into:
+      zip -> sector -> year -> aggregated yearly totals (sum of quarters).
+
+    Shape for year payload:
+      {
+        "electricity_cost_no_solar_usd": float,
+        "electricity_cost_with_solar_usd": float,
+        "co2_emissions_no_solar_tons": float,
+        "co2_emissions_with_solar_tons": float,
+      }
+    """
+    global _CO2_COST_BY_ZIP, _CO2_COST_SOURCE_PATH, _CO2_COST_SOURCE_MTIME  # noqa: PLW0603
+
+    path = _co2_cost_csv_path()
+    if not path.exists():
+        raise RuntimeError(f"CO2 cost CSV not found at {path}")
+
+    mtime = path.stat().st_mtime
+    if (
+        _CO2_COST_BY_ZIP is not None
+        and _CO2_COST_SOURCE_PATH == str(path)
+        and _CO2_COST_SOURCE_MTIME == mtime
+    ):
+        return _CO2_COST_BY_ZIP, str(path)
+
+    indexed: dict[str, dict[str, dict[int, dict[str, float]]]] = {}
+    with path.open("r", encoding="utf-8", newline="") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            z = (row.get("zip_code") or "").strip()
+            sector = (row.get("sector") or "").strip().lower()
+            year = _to_int(row.get("year"))
+            if not z or not sector or year is None:
+                continue
+
+            co2_no = _to_float(row.get("co2_emissions_no_solar_tons")) or 0.0
+            co2_yes = _to_float(row.get("co2_emissions_with_solar_tons")) or 0.0
+            cost_no = _to_float(row.get("electricity_cost_no_solar_usd")) or 0.0
+            cost_yes = _to_float(row.get("electricity_cost_with_solar_usd")) or 0.0
+
+            by_sector = indexed.setdefault(z, {})
+            by_year = by_sector.setdefault(sector, {})
+            agg = by_year.setdefault(
+                int(year),
+                {
+                    "electricity_cost_no_solar_usd": 0.0,
+                    "electricity_cost_with_solar_usd": 0.0,
+                    "co2_emissions_no_solar_tons": 0.0,
+                    "co2_emissions_with_solar_tons": 0.0,
+                },
+            )
+            agg["electricity_cost_no_solar_usd"] += float(cost_no)
+            agg["electricity_cost_with_solar_usd"] += float(cost_yes)
+            agg["co2_emissions_no_solar_tons"] += float(co2_no)
+            agg["co2_emissions_with_solar_tons"] += float(co2_yes)
+
+    _CO2_COST_BY_ZIP = indexed
+    _CO2_COST_SOURCE_PATH = str(path)
+    _CO2_COST_SOURCE_MTIME = mtime
+    return indexed, str(path)
+
+
+def _pick_sector_for_zip(by_sector: dict[str, dict[int, dict[str, float]]]) -> str | None:
+    # Prefer residential if it has meaningful data; otherwise pick the sector with highest baseline cost.
+    if "r" in by_sector:
+        total_r = sum(v.get("electricity_cost_no_solar_usd", 0.0) for v in by_sector["r"].values())
+        if total_r > 0:
+            return "r"
+
+    best = None
+    best_total = -1.0
+    for sector, by_year in by_sector.items():
+        total = sum(v.get("electricity_cost_no_solar_usd", 0.0) for v in by_year.values())
+        if total > best_total:
+            best_total = total
+            best = sector
+    return best
+
+
+@app.get("/api/co2_cost_series")
+def co2_cost_series(zip: str, sector: str | None = None):
+    normalized_zip = "".join(ch for ch in str(zip).strip() if ch.isdigit())
+    if len(normalized_zip) not in {5, 9}:
+        raise HTTPException(status_code=400, detail="zip must be a 5- or 9-digit zipcode")
+
+    with _CO2_COST_LOCK:
+        indexed, source_path = _load_co2_cost_index()
+
+    by_sector = indexed.get(normalized_zip)
+    if not by_sector:
+        raise HTTPException(status_code=404, detail=f"No CO2/cost series found for zip {normalized_zip}")
+
+    chosen_sector = (sector or "").strip().lower() or _pick_sector_for_zip(by_sector)
+    if not chosen_sector or chosen_sector not in by_sector:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No CO2/cost series found for zip {normalized_zip} (sector={sector or 'auto'})",
+        )
+
+    by_year = by_sector[chosen_sector]
+    years = []
+    for y in sorted(by_year.keys()):
+        payload = by_year[y]
+        years.append(
+            {
+                "year": int(y),
+                "electricity_cost_no_solar_usd": round(float(payload.get("electricity_cost_no_solar_usd", 0.0)), 2),
+                "electricity_cost_with_solar_usd": round(float(payload.get("electricity_cost_with_solar_usd", 0.0)), 2),
+                "co2_emissions_no_solar_tons": round(float(payload.get("co2_emissions_no_solar_tons", 0.0)), 4),
+                "co2_emissions_with_solar_tons": round(float(payload.get("co2_emissions_with_solar_tons", 0.0)), 4),
+            }
+        )
+
+    return {
+        "zip_code": normalized_zip,
+        "sector": chosen_sector,
+        "years": years,
+        "source": {"path": source_path, "unit": {"cost": "usd/year", "co2": "tons/year"}},
+    }
 
 
 def _pick_column(columns: list[str], candidates: list[str]) -> str | None:

@@ -1,5 +1,6 @@
 import './EstimatePanel.css'
 import { useEffect, useMemo, useState } from 'react'
+import co2CostCsvRaw from '../../../data/co2_cost/co2_emissions_cost_electricity.csv?raw'
 
 export default function EstimatePanel({
   onEstimate,
@@ -34,7 +35,10 @@ export default function EstimatePanel({
     setZipInput(z)
   }, [activeZip])
 
-  const estimate = useMemo(() => buildFakeEstimate(activeZip), [activeZip])
+  const estimate = useMemo(
+    () => buildEstimateFromCo2CostCsv(activeZip) ?? buildFakeEstimate(activeZip),
+    [activeZip],
+  )
   const boundaryOptimalityScore = useMemo(() => {
     const z = String(activeZip || '').trim()
     if (!z) return null
@@ -169,7 +173,7 @@ export default function EstimatePanel({
               <div className="estimateGrid">
                 <ChartCard
                   title="cost (with vs without solar)"
-                  subtitle="projected annual bill"
+                  subtitle="projected quarterly bill"
                   value={
                     activeZip
                       ? `${formatCurrency(estimate.costWithSolar.at(-1)?.value ?? 0)} vs ${formatCurrency(
@@ -192,7 +196,7 @@ export default function EstimatePanel({
 
                 <ChartCard
                   title="carbon (with vs without solar)"
-                  subtitle="metric tons CO₂e / year"
+                  subtitle="metric tons CO₂e / quarter"
                   value={
                     activeZip
                       ? `${formatTons(estimate.emissionsWithSolar.at(-1)?.value ?? 0)} vs ${formatTons(
@@ -588,6 +592,180 @@ function buildFakeEstimate(zip) {
     tenYearNetSavingsUsd,
     features,
   }
+}
+
+let _co2CostIndex = null
+
+function buildCo2CostIndex() {
+  if (_co2CostIndex) return _co2CostIndex
+
+  const lines = String(co2CostCsvRaw || '')
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter(Boolean)
+  if (lines.length < 2) {
+    _co2CostIndex = { byZip: {} }
+    return _co2CostIndex
+  }
+
+  const header = lines[0].split(',')
+  const idx = Object.fromEntries(header.map((h, i) => [h.trim(), i]))
+  const required = [
+    'zip_code',
+    'sector',
+    'year',
+    'quarter',
+    'co2_emissions_no_solar_tons',
+    'co2_emissions_with_solar_tons',
+    'electricity_cost_no_solar_usd',
+    'electricity_cost_with_solar_usd',
+  ]
+  for (const key of required) {
+    if (!(key in idx)) {
+      _co2CostIndex = { byZip: {} }
+      return _co2CostIndex
+    }
+  }
+
+  const byZip = {}
+  for (let i = 1; i < lines.length; i += 1) {
+    const parts = lines[i].split(',')
+    const z = (parts[idx.zip_code] || '').trim()
+    const sector = (parts[idx.sector] || '').trim().toLowerCase()
+    const year = toInt(parts[idx.year])
+    const quarter = toInt(parts[idx.quarter])
+    if (!z || !sector || !Number.isFinite(year) || !Number.isFinite(quarter)) continue
+    if (quarter < 1 || quarter > 4) continue
+
+    const co2No = toFloat(parts[idx.co2_emissions_no_solar_tons]) ?? 0
+    const co2Yes = toFloat(parts[idx.co2_emissions_with_solar_tons]) ?? 0
+    const costNo = toFloat(parts[idx.electricity_cost_no_solar_usd]) ?? 0
+    const costYes = toFloat(parts[idx.electricity_cost_with_solar_usd]) ?? 0
+
+    const bySector = (byZip[z] ||= {})
+    const byYear = (bySector[sector] ||= {})
+    const byQuarter = (byYear[year] ||= {})
+    const agg =
+      (byQuarter[quarter] ||= {
+        electricity_cost_no_solar_usd: 0,
+        electricity_cost_with_solar_usd: 0,
+        co2_emissions_no_solar_tons: 0,
+        co2_emissions_with_solar_tons: 0,
+      })
+
+    agg.electricity_cost_no_solar_usd += costNo
+    agg.electricity_cost_with_solar_usd += costYes
+    agg.co2_emissions_no_solar_tons += co2No
+    agg.co2_emissions_with_solar_tons += co2Yes
+  }
+
+  _co2CostIndex = { byZip }
+  return _co2CostIndex
+}
+
+function pickSectorForZip(bySector) {
+  if (bySector?.r) {
+    const totalR = Object.values(bySector.r).reduce((accY, byQuarter) => {
+      const subtotal = Object.values(byQuarter || {}).reduce(
+        (accQ, v) => accQ + (v?.electricity_cost_no_solar_usd ?? 0),
+        0,
+      )
+      return accY + subtotal
+    }, 0)
+    if (totalR > 0) return 'r'
+  }
+
+  let best = null
+  let bestTotal = -1
+  for (const [sector, byYear] of Object.entries(bySector || {})) {
+    const total = Object.values(byYear || {}).reduce((accY, byQuarter) => {
+      const subtotal = Object.values(byQuarter || {}).reduce(
+        (accQ, v) => accQ + (v?.electricity_cost_no_solar_usd ?? 0),
+        0,
+      )
+      return accY + subtotal
+    }, 0)
+    if (total > bestTotal) {
+      bestTotal = total
+      best = sector
+    }
+  }
+  return best
+}
+
+function buildEstimateFromCo2CostCsv(zip) {
+  const normalized = String(zip || '').trim()
+  if (!normalized) return null
+
+  const { byZip } = buildCo2CostIndex()
+  const bySector = byZip?.[normalized]
+  if (!bySector) return null
+
+  const sector = pickSectorForZip(bySector)
+  if (!sector || !bySector[sector]) return null
+
+  const byYear = bySector[sector]
+  const points = []
+  for (const [yearRaw, byQuarter] of Object.entries(byYear || {})) {
+    const y = toInt(yearRaw)
+    if (!Number.isFinite(y)) continue
+    for (const [qRaw, v] of Object.entries(byQuarter || {})) {
+      const q = toInt(qRaw)
+      if (!Number.isFinite(q) || q < 1 || q > 4) continue
+      points.push({
+        year: y,
+        quarter: q,
+        label: `${y} Q${q}`,
+        v,
+      })
+    }
+  }
+  points.sort((a, b) => (a.year - b.year) * 10 + (a.quarter - b.quarter))
+
+  const costWithoutSolar = points.map((p) => ({
+    year: p.label,
+    value: roundTo(p.v?.electricity_cost_no_solar_usd ?? 0, 0),
+  }))
+  const costWithSolar = points.map((p) => ({
+    year: p.label,
+    value: roundTo(p.v?.electricity_cost_with_solar_usd ?? 0, 0),
+  }))
+  const emissionsWithoutSolar = points.map((p) => ({
+    year: p.label,
+    value: roundTo(p.v?.co2_emissions_no_solar_tons ?? 0, 2),
+  }))
+  const emissionsWithSolar = points.map((p) => ({
+    year: p.label,
+    value: roundTo(p.v?.co2_emissions_with_solar_tons ?? 0, 2),
+  }))
+
+  const tenYearNoSolar = sum(costWithoutSolar.map((p) => p.value))
+  const tenYearSolar = sum(costWithSolar.map((p) => p.value))
+  const tenYearNetSavingsUsd = roundTo(tenYearNoSolar - tenYearSolar, 0)
+
+  // Keep the rest of the panel working; charts are the real data here.
+  return {
+    solarOptimalityScore: null,
+    costWithSolar,
+    costWithoutSolar,
+    emissionsWithSolar,
+    emissionsWithoutSolar,
+    tenYearNetSavingsUsd,
+    features: [
+      { label: 'data source', value: 'co2_emissions_cost_electricity.csv' },
+      { label: 'sector', value: sector },
+    ],
+  }
+}
+
+function toInt(v) {
+  const n = Number.parseInt(String(v ?? '').trim(), 10)
+  return Number.isFinite(n) ? n : null
+}
+
+function toFloat(v) {
+  const n = Number.parseFloat(String(v ?? '').trim())
+  return Number.isFinite(n) ? n : null
 }
 
 async function mockFetchGoogleSunroof(zip) {

@@ -171,6 +171,51 @@ function formatOpportunityScoreNumber(score) {
   return String(Math.round(n * 100))
 }
 
+function opportunityScoreToTFromZip(zip, fallbackOptimalityScore) {
+  const z = normalizeZipString(zip)
+  const fromCsv = SOLAR_SCORES_BY_ZIP.get(z)?.residential
+  if (Number.isFinite(fromCsv)) return clamp01(fromCsv) // CSV is 0..1
+  // Fallback to backend 55..95 scale if CSV missing for that zip.
+  return scoreToT(fallbackOptimalityScore)
+}
+
+function buildQuantileTByZip(features) {
+  if (!Array.isArray(features) || !features.length) return new Map()
+
+  const rows = []
+  for (const f of features) {
+    const p = f?.properties ?? {}
+    const z = getZipFromProperties(p)
+    if (!z) continue
+    const s = SOLAR_SCORES_BY_ZIP.get(z)?.residential
+    if (!Number.isFinite(s)) continue
+    rows.push({ z, s })
+  }
+
+  if (rows.length <= 1) return new Map()
+
+  const sortedScores = rows
+    .map((r) => r.s)
+    .sort((a, b) => a - b)
+
+  const denom = sortedScores.length - 1
+  // For duplicates, assign the average rank so equal scores map to equal colors.
+  const midRankByScore = new Map()
+  for (let i = 0; i < sortedScores.length; i++) {
+    const s = sortedScores[i]
+    if (midRankByScore.has(s)) continue
+    let j = i
+    while (j + 1 < sortedScores.length && sortedScores[j + 1] === s) j++
+    const mid = (i + j) / 2
+    midRankByScore.set(s, mid / denom)
+    i = j
+  }
+
+  const out = new Map()
+  for (const { z, s } of rows) out.set(z, midRankByScore.get(s) ?? 0)
+  return out
+}
+
 function clamp(n, min, max) {
   return Math.max(min, Math.min(max, n))
 }
@@ -241,6 +286,11 @@ export default function MapPage() {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [autoZoomEnabled, setAutoZoomEnabled] = useState(true)
 
+  const quantileTByZip = useMemo(
+    () => buildQuantileTByZip(boundaries?.features),
+    [boundaries?.features],
+  )
+
   useEffect(() => {
     let cancelled = false
 
@@ -298,7 +348,9 @@ export default function MapPage() {
 
     return (feature, opts = {}) => {
       const p = feature?.properties ?? {}
-      const t = scoreToT(p.optimalityScore)
+      const z = getZipFromProperties(p)
+      // Use quantile rank to spread colors across the palette even when scores cluster high.
+      const t = quantileTByZip.get(z) ?? opportunityScoreToTFromZip(z, p.optimalityScore)
       const fillColor = boostHexSaturation(lerpColor(lowFill, highFill, t), saturationBoost)
       const baseFillOpacity = lerp(0.28, 0.72, t)
       const hoverBoost = opts.hover ? 0.06 : 0
@@ -311,7 +363,7 @@ export default function MapPage() {
         fillOpacity: clamp01(baseFillOpacity + hoverBoost),
       }
     }
-  }, [])
+  }, [quantileTByZip])
 
   const onEachBoundary = useMemo(() => {
     return (feature, layer) => {
@@ -392,8 +444,11 @@ export default function MapPage() {
       const p = f?.properties ?? {}
       const z = getZipFromProperties(p)
       if (!z) continue
+      const residential = SOLAR_SCORES_BY_ZIP.get(z)?.residential
+      const pct = Number.isFinite(residential) ? Math.round(residential * 100) : null
       map[z] = {
-        optimalityScore: p.optimalityScore,
+        // Keep prop name for now; value is now the same number shown on-map (residential opportunity score 0..100).
+        optimalityScore: Number.isFinite(pct) ? pct : p.optimalityScore,
       }
     }
     return map

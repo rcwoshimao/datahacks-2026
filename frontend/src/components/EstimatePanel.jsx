@@ -130,7 +130,7 @@ export default function EstimatePanel({
             <div className="estimateHero">
               <div className="estimateHeroTop">
                 <div className="estimateBigNumber">{displayedOptimalityScore ?? '—'}</div>
-                <div className="estimateBigNumberLabel">solar optimality score</div>
+                <div className="estimateBigNumberLabel">solar opportunity score (residential)</div>
               </div>
 
               <div className="estimateHeroBottom">

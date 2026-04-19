@@ -1,0 +1,67 @@
+zip_code,place_name,state_name,latitude,longitude,avg_ghi_kwh_m2_day,avg_dni_kwh_m2_day,avg_lat_tilt_kwh_m2_day
+91901,Alpine,California,32.8282,-116.7543,5.55,6.81,6.31
+91902,Bonita,California,32.6671,-117.0221,5.38,6.06,6.16
+91906,Campo,California,32.6605,-116.4905,5.71,7.42,6.5
+91931,Guatay,California,32.8497,-116.5583,5.64,7.39,6.4
+91935,Jamul,California,32.7163,-116.8323,5.46,6.43,6.22
+91941,La Mesa,California,32.7604,-117.0115,5.36,6.05,6.12
+91950,National City,California,32.6749,-117.0897,5.38,6.06,6.16
+91962,Pine Valley,California,32.835,-116.5127,5.64,7.39,6.4
+91963,Potrero,California,32.6205,-116.6037,5.63,7.09,6.39
+91977,Spring Valley,California,32.724,-116.9976,5.43,6.28,6.19
+91978,Spring Valley,California,32.7329,-116.9596,5.43,6.28,6.19
+92003,Bonsall,California,33.294,-117.1897,5.3,5.91,6.05
+92004,Borrego Springs,California,33.2386,-116.3514,5.84,7.54,6.72
+92009,Carlsbad,California,33.0954,-117.2619,4.94,4.8,5.63
+92014,Del Mar,California,32.9665,-117.249,4.96,4.89,5.66
+92019,El Cajon,California,32.7777,-116.9191,5.43,6.28,6.19
+92020,El Cajon,California,32.7928,-116.9665,5.43,6.28,6.19
+92021,El Cajon,California,32.8178,-116.9223,5.44,6.27,6.21
+92025,Escondido,California,33.1101,-117.07,5.39,6.15,6.15
+92026,Escondido,California,33.1605,-117.0978,5.39,6.15,6.15
+92027,Escondido,California,33.1388,-117.052,5.39,6.15,6.15
+92028,Fallbrook,California,33.369,-117.229,5.34,5.95,6.1
+92029,Escondido,California,33.0895,-117.1128,5.28,5.81,6.03
+92036,Julian,California,33.0534,-116.5658,5.62,7.38,6.39
+92037,La Jolla,California,32.8455,-117.2521,4.93,4.92,5.63
+92040,Lakeside,California,32.8562,-116.9201,5.44,6.27,6.21
+92065,Ramona,California,33.0293,-116.8535,5.52,6.66,6.3
+92067,Rancho Santa Fe,California,33.005,-117.2157,4.94,4.8,5.63
+92082,Valley Center,California,33.249,-117.0122,5.42,6.32,6.18
+92084,Vista,California,33.2131,-117.2243,5.29,5.75,6.05
+92086,Warner Springs,California,33.3096,-116.6527,5.71,7.56,6.53
+92091,Rancho Santa Fe,California,32.9623,-117.0462,5.36,6.04,6.11
+92101,San Diego,California,32.7185,-117.1593,5.26,5.76,6.03
+92102,San Diego,California,32.7139,-117.1219,5.26,5.76,6.03
+92103,San Diego,California,32.7466,-117.1636,5.26,5.76,6.03
+92104,San Diego,California,32.7454,-117.1272,5.26,5.76,6.03
+92105,San Diego,California,32.7423,-117.0947,5.36,6.05,6.12
+92106,San Diego,California,32.7272,-117.2268,4.97,4.94,5.67
+92107,San Diego,California,32.7425,-117.2433,4.97,4.94,5.67
+92108,San Diego,California,32.7783,-117.1335,5.26,5.76,6.03
+92109,San Diego,California,32.7969,-117.2405,4.97,4.94,5.67
+92110,San Diego,California,32.7635,-117.2028,4.97,4.94,5.67
+92111,San Diego,California,32.7972,-117.1708,5.26,5.76,6.03
+92113,San Diego,California,32.697,-117.1153,5.18,5.44,5.92
+92114,San Diego,California,32.7059,-117.0524,5.36,6.05,6.12
+92115,San Diego,California,32.7607,-117.0721,5.36,6.05,6.12
+92116,San Diego,California,32.7624,-117.1242,5.26,5.76,6.03
+92117,San Diego,California,32.8239,-117.1965,5.29,5.85,6.05
+92119,San Diego,California,32.8036,-117.0261,5.37,6.12,6.12
+92120,San Diego,California,32.7958,-117.0707,5.36,6.05,6.12
+92121,San Diego,California,32.8919,-117.2035,4.93,4.92,5.63
+92122,San Diego,California,32.8577,-117.2115,4.93,4.92,5.63
+92123,San Diego,California,32.7973,-117.1392,5.26,5.76,6.03
+92124,San Diego,California,32.8201,-117.0986,5.37,6.12,6.12
+92126,San Diego,California,32.9161,-117.1402,5.27,5.76,6.02
+92127,San Diego,California,33.0279,-117.0856,5.37,6.03,6.13
+92128,San Diego,California,33.0067,-117.069,5.37,6.03,6.13
+92129,San Diego,California,32.9652,-117.1213,5.27,5.76,6.02
+92130,San Diego,California,32.9555,-117.2252,4.96,4.89,5.66
+92131,San Diego,California,32.9123,-117.0898,5.36,6.04,6.11
+92139,San Diego,California,32.6806,-117.0474,5.38,6.06,6.16
+92154,San Diego,California,32.5753,-117.0707,5.36,5.94,6.13
+92173,San Ysidro,California,32.5626,-117.043,5.36,5.94,6.13
+92592,Temecula,California,33.4983,-117.0958,5.53,6.55,6.32
+93433,Grover Beach,California,35.121,-120.6173,5.09,5.67,5.86
+95461,Middletown,California,38.7824,-122.6487,5.05,6.08,5.8

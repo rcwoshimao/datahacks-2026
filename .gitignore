@@ -15,6 +15,7 @@
 .env
 .env.*
 !.env.example
+.venv/
 
 # Editors
 .vscode/*

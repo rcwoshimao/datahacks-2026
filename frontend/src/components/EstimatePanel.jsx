@@ -26,22 +26,14 @@ export default function EstimatePanel() {
         type="button"
         onClick={() => {
           // placeholder: wire up estimate action later
+          const trimmed = zip.trim()
+          navigate(trimmed ? `/page2?zip=${encodeURIComponent(trimmed)}` : '/page2')
           console.log('estimate', { zip })
         }}
       >
         estimate
       </button>
 
-      <button
-        className="estimateButton secondary"
-        type="button"
-        onClick={() => {
-          const trimmed = zip.trim()
-          navigate(trimmed ? `/page2?zip=${encodeURIComponent(trimmed)}` : '/page2')
-        }}
-      >
-        next
-      </button>
     </div>
   )
 }

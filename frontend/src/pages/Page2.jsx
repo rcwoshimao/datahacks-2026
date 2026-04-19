@@ -143,25 +143,45 @@ export default function Page2() {
 
   return (
     <main className="page2">
-      <MapContainer className="page2Map" center={center} zoom={12} scrollWheelZoom>
-        <TileLayer
-          minZoom={0}
-          maxZoom={20}
-          attribution='&copy; <a href="https://www.stadiamaps.com/" target="_blank" rel="noreferrer">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank" rel="noreferrer">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors'
-          url="https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png"
-        />
-        <HeatLayer points={points} options={heatOptions} />
-      </MapContainer>
-
-      <div className="page2Panel">
-        <div className="page2Title">Solar efficiency heat map (fake)</div>
-        <div className="page2Meta">
-          Zipcode: <span className="page2Zip">{zip || '—'}</span>
-        </div>
-        <Link className="page2Link" to={zip ? `/?zip=${encodeURIComponent(zip)}` : '/'}>
-          Back to map
+      <header className="page2Header">
+        <div className="page2HeaderTitle">Solar placement (demo)</div>
+        <Link className="page2HeaderLink" to="/">
+          Back
         </Link>
-      </div>
+      </header>
+
+      <section className="page2Content">
+        <aside className="page2Analytics">
+          <div className="page2Card">
+            <div className="page2CardTitle">Inputs</div>
+            <div className="page2Meta">
+              Zipcode: <span className="page2Zip">{zip || '—'}</span>
+            </div>
+          </div>
+
+          <div className="page2Card">
+            <div className="page2CardTitle">Analytics</div>
+            <div className="page2Placeholder">
+              (space for charts / metrics / explanations)
+            </div>
+          </div>
+        </aside>
+
+        <div className="page2MapWindow">
+          <div className="page2MapWindowTitle">Efficiency heat map (fake)</div>
+          <div className="page2MapFrame">
+            <MapContainer className="page2Map" center={center} zoom={12} scrollWheelZoom>
+              <TileLayer
+                minZoom={0}
+                maxZoom={20}
+                attribution='&copy; <a href="https://www.stadiamaps.com/" target="_blank" rel="noreferrer">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank" rel="noreferrer">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors'
+                url="https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png"
+              />
+              <HeatLayer points={points} options={heatOptions} />
+            </MapContainer>
+          </div>
+        </div>
+      </section>
     </main>
   )
 }

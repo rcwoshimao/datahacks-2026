@@ -16,6 +16,19 @@
 .env.*
 !.env.example
 
+# Data downloads
+data/
+
+# Python
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.pyc
+venv/
+.venv/
+datahack26/
+
 # Editors
 .vscode/*
 !.vscode/extensions.json

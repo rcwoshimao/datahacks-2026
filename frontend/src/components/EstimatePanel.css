@@ -1,0 +1,57 @@
+.estimatePanel {
+  padding: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(10px);
+  box-shadow: rgba(0, 0, 0, 0.14) 0 8px 18px -10px;
+  display: grid;
+  gap: 10px;
+  width: 220px;
+}
+
+.estimateLabel {
+  text-align: left;
+  font-size: 14px;
+  color: #111827;
+}
+
+.estimateInput {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 10px;
+  font: inherit;
+  color: #111827;
+  background: rgba(255, 255, 255, 0.95);
+  outline: none;
+}
+
+.estimateInput:focus {
+  border-color: rgba(17, 24, 39, 0.45);
+}
+
+.estimateButton {
+  appearance: none;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font: inherit;
+  color: #111827;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.estimateButton.secondary {
+  background: rgba(249, 250, 251, 0.9);
+}
+
+.estimateButton:hover {
+  background: #f9fafb;
+}
+
+.estimateButton:active {
+  transform: translateY(1px);
+}
+

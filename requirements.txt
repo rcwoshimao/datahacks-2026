@@ -132,6 +132,7 @@ pyproj==3.7.2
 PySocks @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/pysocks_1699237568675/work
 python-dateutil @ file:///home/conda/feedstock_root/build_artifacts/python-dateutil_1733215673016/work
 python-dotenv==1.2.2
+databricks-sdk==0.102.0
 python-json-logger==4.1.0
 pytz==2025.2
 PyYAML @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_faoex52hrr/croot/pyyaml_1728657970485/work

@@ -2,6 +2,8 @@
 
 ### Project Title
 **Solar Savings Engine**
+Caculating a Solar oppurtunity score 
+
 
 ### One-line summary
 A web app that helps identify where solar should be deployed next by combining geospatial environmental signals, existing solar permit patterns, and energy-cost/emissions estimates, starting with **UCSD** and later expanding to **San Diego ZIP codes**.

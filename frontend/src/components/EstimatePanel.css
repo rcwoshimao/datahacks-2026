@@ -1,57 +1,493 @@
 .estimatePanel {
-  padding: 10px;
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.88);
+  padding: 12px;
+  /* border: 1px solid var(--app-border);
+  border-radius: 12px; */
+  background: color-mix(in srgb, var(--app-surface), transparent 6%);
   backdrop-filter: blur(10px);
-  box-shadow: rgba(0, 0, 0, 0.14) 0 8px 18px -10px;
+  box-shadow: var(--app-shadow);
   display: grid;
+  gap: 12px;
+  width: min(520px, calc(100vw - 24px));
+}
+
+.estimateDrawerOverlay {
+  position: fixed;
+  inset: var(--app-navbar-height, 56px) 0 0 0;
+  z-index: 1990;
+  /* border: 0; */
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--app-overlay);
+}
+
+.estimateDrawer {
+  position: fixed;
+  top: var(--app-navbar-height, 56px);
+  right: 0;
+  bottom: 0;
+  z-index: 2001;
+  width: min(520px, 92vw);
+  color: black !important; 
+  /* Drawer palette overrides (scoped) */
+  --app-surface: var(--deep-space-blue);
+  --app-surface-2: color-mix(in srgb, var(--deep-space-blue), var(--steel-blue) 20%);
+  --app-text: var(--papaya-whip);
+  --app-text-muted: color-mix(in srgb, var(--papaya-whip), transparent 32%);
+  --app-border: color-mix(in srgb, var(--steel-blue), transparent 55%);
+  --app-border-subtle: color-mix(in srgb, var(--steel-blue), transparent 72%);
+  --app-shadow: rgba(0, 0, 0, 0.38) 0 22px 50px -28px;
+
+  background: var(--papaya-whip);
+  backdrop-filter: blur(12px);
+  /* border-left: 1px solid var(--app-border-subtle); */
+  transform: translateX(110%);
+  transition: transform 180ms ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.estimateDrawer.open {
+  transform: translateX(0);
+}
+
+.estimateDrawerHeader {
+  padding: 12px 12px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: 10px;
-  width: 220px;
+  /* border-bottom: 1px solid var(--app-border-subtle); */
+}
+
+.estimateDrawerHeaderLeft {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.estimateDrawerTitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--app-text);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.estimateDrawerSub {
+  font-size: 12px;
+  color: var(--app-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.estimateDrawerZip {
+  font-weight: 750;
+  color: var(--app-text);
+}
+
+.estimateDrawerClose {
+  appearance: none;
+  /* border: 1px solid var(--app-border); */
+  border-radius: 999px;
+  padding: 8px 12px;
+  font: inherit;
+  color: var(--app-text);
+  background: color-mix(in srgb, var(--app-surface), transparent 12%);
+  cursor: pointer;
+}
+
+.estimateDrawerClose:hover {
+  background: color-mix(in srgb, var(--app-surface-2), transparent 4%);
+}
+
+.estimateDrawerScroll {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 12px;
+}
+
+.estimateDrawer .estimatePanel {
+  width: 100%;
+  /* border: 0;
+  border-radius: 0; */
+  background: transparent;
+  backdrop-filter: none;
+  box-shadow: none;
+  padding: 0;
+}
+
+.estimateDrawer :where(.estimateCardTitle, .estimateCardValue, .estimateFeatureValue, .estimatePillValue) {
+  color: var(--app-text);
+}
+
+.estimateDrawer :where(.estimateCardSubtitle, .estimateFeatureLabel, .estimatePillLabel, .estimateSectionTitle, .estimateBigNumberLabel) {
+  color: var(--app-text-muted);
 }
 
 .estimateLabel {
   text-align: left;
   font-size: 14px;
-  color: #111827;
+  color: var(--app-text);
 }
 
 .estimateInput {
   width: 100%;
   box-sizing: border-box;
   padding: 10px 12px;
-  border: 1px solid rgba(0, 0, 0, 0.15);
+  /* border: 1px solid var(--app-border); */
   border-radius: 10px;
   font: inherit;
-  color: #111827;
-  background: rgba(255, 255, 255, 0.95);
+  color: var(--app-text);
+  background: color-mix(in srgb, var(--app-surface), transparent 2%);
   outline: none;
+  min-width: 0;
+}
+
+.estimateInput::placeholder {
+  color: color-mix(in srgb, var(--app-text), transparent 45%);
 }
 
 .estimateInput:focus {
-  border-color: rgba(17, 24, 39, 0.45);
+  border-color: color-mix(in srgb, var(--app-text), transparent 55%);
 }
 
 .estimateButton {
   appearance: none;
-  border: 1px solid rgba(0, 0, 0, 0.15);
+  /* border: 1px solid var(--app-border); */
   border-radius: 10px;
   padding: 10px 12px;
   font: inherit;
-  color: #111827;
-  background: #ffffff;
+  color: var(--app-text);
+  background: var(--app-surface);
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .estimateButton.secondary {
-  background: rgba(249, 250, 251, 0.9);
+  background: color-mix(in srgb, var(--app-surface-2), transparent 6%);
 }
 
 .estimateButton:hover {
-  background: #f9fafb;
+  background: var(--app-surface-2);
 }
 
 .estimateButton:active {
   transform: translateY(1px);
+}
+
+.estimateError {
+  margin-top: 8px;
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--app-danger);
+}
+
+.estimateHero {
+  border-radius: 14px;
+  padding: 14px 14px 12px;
+  /* border: 1px solid var(--app-border-subtle); */
+  background: inherit;
+}
+
+.estimateHeroTop {
+  display: grid;
+  gap: 2px;
+}
+
+.estimateBigNumber {
+  font-size: 44px;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+  color: var(--app-text);
+  line-height: 1.05;
+}
+
+.estimateBigNumberLabel {
+  font-size: 12px;
+  color: var(--app-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.estimateHeroBottom {
+  margin-top: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.estimateHeroRow {
+  display: grid;
+  gap: 10px;
+}
+
+.estimatePill {
+  /* border: 1px solid var(--app-border-subtle); */
+  background: var(--molten-lava);
+  border-radius: 12px;
+  padding: 10px 12px;
+  display: grid;
+  gap: 4px;
+}
+
+.estimatePillLabel {
+  font-size: 11px;
+  color: var(--app-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.estimatePillValue {
+  font-size: 13px;
+  color: var(--app-text);
+  line-height: 1.25;
+}
+
+.estimateSection {
+  display: grid;
+  gap: 10px;
+}
+
+.estimateSectionTitle {
+  font-size: 12px;
+  color: var(--app-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.estimateGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.estimateCard {
+  /* border: 1px solid var(--app-border); */
+  border-radius: 14px;
+  background: var(--app-surface-2);
+  overflow: hidden;
+}
+
+.estimateCardFull {
+  grid-column: 1 / -1;
+}
+
+.estimateCardHeader {
+  padding: 10px 12px 8px;
+  display: grid;
+  gap: 2px;
+}
+
+.estimateCardTitle {
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--app-text);
+  text-transform: lowercase;
+}
+
+.estimateCardSubtitle {
+  font-size: 12px;
+  color: var(--app-text-muted);
+}
+
+.estimateCardValue {
+  margin-top: 6px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--app-text);
+}
+
+.estimateCardBody {
+  padding: 10px 12px 12px;
+  /* border-top: 1px solid var(--app-border-subtle); */
+}
+
+.estimateChart {
+  display: grid;
+  gap: 8px;
+  position: relative;
+}
+
+.estimateLegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  font-size: 12px;
+  color: var(--app-text-muted);
+}
+
+.estimateLegendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.estimateLegendSwatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  flex: 0 0 auto;
+}
+
+.estimateLegendLabel {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.estimateTooltip {
+  position: absolute;
+  top: 34px;
+  transform: translateX(-50%);
+  z-index: 5;
+  background: var(--app-surface-2);
+  /* border: 1px solid var(--app-border); */
+  border-radius: 12px;
+  box-shadow: var(--app-shadow);
+  padding: 10px 10px 9px;
+  min-width: 170px;
+  max-width: 240px;
+  backdrop-filter: blur(10px);
+  pointer-events: none;
+}
+
+.estimateTooltipYear {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--app-text-muted);
+  margin-bottom: 6px;
+}
+
+.estimateTooltipRow {
+  display: grid;
+  grid-template-columns: 10px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: color-mix(in srgb, var(--app-text), transparent 18%);
+  margin-top: 4px;
+}
+
+.estimateTooltipSwatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+}
+
+.estimateTooltipLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.estimateTooltipValue {
+  font-weight: 750;
+  color: var(--app-text);
+}
+
+.estimateChartSvg {
+  width: 100%;
+  height: 130px;
+  display: block;
+  background: #ffffff;
+  /* border: 1px solid var(--app-border-subtle); */
+  border-radius: 12px;
+}
+
+.estimateChartSvg .axis {
+  stroke: rgba(0, 0, 0, 0.22);
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+}
+
+.estimateChartMeta {
+  display: grid;
+  gap: 4px;
+  font-size: 12px;
+  color: color-mix(in srgb, var(--app-text), transparent 22%);
+}
+
+.estimateChartMetaRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.estimateChartMetaKey {
+  color: var(--app-text-muted);
+}
+
+.estimateChartMetaVal {
+  font-weight: 650;
+  color: var(--app-text);
+}
+
+.estimateFeatureGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.estimateFeature {
+  /* border: 1px solid var(--app-border-subtle); */
+  border-radius: 12px;
+  background: var(--app-surface-2);
+  padding: 10px 12px;
+  display: grid;
+  gap: 3px;
+}
+
+.estimateFeatureLabel {
+  font-size: 11px;
+  color: var(--app-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.estimateFeatureValue {
+  font-size: 13px;
+  color: var(--app-text);
+  font-weight: 650;
+}
+
+.estimateZipFooter {
+  /* border-top: 1px solid var(--app-border-subtle); */
+  padding-top: 10px;
+  display: grid;
+  gap: 8px;
+}
+
+.estimateZipSubheader {
+  font-size: 12px;
+  color: var(--app-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.estimateZipControls {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+}
+
+@media (min-width: 640px) {
+  .estimateGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .estimateFeatureGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .estimateHeroRow {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 

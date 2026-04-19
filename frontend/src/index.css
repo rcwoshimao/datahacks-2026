@@ -1,15 +1,58 @@
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
+  /* Base palette (can be overridden) */
+  --olive-leaf: #606c38ff;
+  --black-forest: #283618ff;
+  --cornsilk: #fefae0ff;
+  --sunlit-clay: #dda15eff;
+  --copperwood: #bc6c25ff;
+
+  /* Alt palette (requested) */
+  --molten-lava: #780000ff;
+  --brick-red: #c1121fff;
+  --papaya-whip: #fdf0d5ff;
+  --deep-space-blue: #003049ff;
+  --steel-blue: #669bbcff;
+
+  --text: color-mix(in srgb, var(--black-forest), var(--olive-leaf) 18%);
+  --text-h: var(--black-forest);
+  --bg: var(--cornsilk);
+  --border: color-mix(in srgb, var(--black-forest), transparent 84%);
   --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
+  --accent: var(--copperwood);
+  --accent-bg: color-mix(in srgb, var(--copperwood), transparent 88%);
+  --accent-border: color-mix(in srgb, var(--copperwood), transparent 55%);
+  --social-bg: color-mix(in srgb, var(--cornsilk), transparent 35%);
   --shadow:
     rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+
+  /*
+    App theme tokens
+
+    To apply a custom palette, override the --app-* variables below.
+    (Everything else in the UI should reference these.)
+  */
+  --app-bg: var(--bg);
+  --app-surface: color-mix(in srgb, var(--cornsilk), white 22%);
+  --app-surface-2: color-mix(in srgb, var(--cornsilk), white 10%);
+  --app-text: var(--text-h);
+  --app-text-muted: color-mix(in srgb, var(--black-forest), transparent 32%);
+  --app-border: color-mix(in srgb, var(--black-forest), transparent 78%);
+  --app-border-subtle: color-mix(in srgb, var(--black-forest), transparent 84%);
+  --app-shadow: rgba(0, 0, 0, 0.14) 0 8px 18px -10px;
+  --app-overlay: color-mix(in srgb, var(--black-forest), transparent 55%);
+  --app-danger: var(--copperwood);
+
+  /* Nav theme (using requested palette) */
+  --nav-bg: var(--deep-space-blue);
+  --nav-text: var(--papaya-whip);
+  --nav-muted: var(--steel-blue);
+  --nav-border: color-mix(in srgb, var(--steel-blue), transparent 55%);
+
+  /* Map styling */
+  --map-stroke: color-mix(in srgb, var(--black-forest), transparent 0%);
+  --map-fill-low: var(--olive-leaf);
+  --map-fill-high: var(--sunlit-clay);
+  --map-selected-stroke: var(--copperwood);
 
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
   --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
@@ -32,17 +75,36 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
+    --text: color-mix(in srgb, var(--cornsilk), transparent 35%);
+    --text-h: var(--cornsilk);
+    --bg: var(--black-forest);
+    --border: color-mix(in srgb, var(--cornsilk), transparent 82%);
+    --code-bg: color-mix(in srgb, var(--black-forest), black 22%);
+    --accent: var(--sunlit-clay);
+    --accent-bg: color-mix(in srgb, var(--sunlit-clay), transparent 82%);
+    --accent-border: color-mix(in srgb, var(--sunlit-clay), transparent 55%);
+    --social-bg: color-mix(in srgb, var(--black-forest), transparent 25%);
     --shadow:
       rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
+
+    --app-bg: var(--bg);
+    --app-surface: color-mix(in srgb, var(--black-forest), white 6%);
+    --app-surface-2: color-mix(in srgb, var(--black-forest), white 10%);
+    --app-text: var(--text-h);
+    --app-text-muted: color-mix(in srgb, var(--cornsilk), transparent 35%);
+    --app-border: color-mix(in srgb, var(--cornsilk), transparent 78%);
+    --app-border-subtle: color-mix(in srgb, var(--cornsilk), transparent 84%);
+    --app-shadow: rgba(0, 0, 0, 0.35) 0 18px 40px -20px;
+    --app-overlay: color-mix(in srgb, black, transparent 55%);
+    --app-danger: var(--sunlit-clay);
+
+    /* Keep nav consistent in dark mode too */
+    --nav-bg: var(--deep-space-blue);
+    --nav-text: var(--papaya-whip);
+    --nav-muted: var(--steel-blue);
+    --nav-border: color-mix(in srgb, var(--steel-blue), transparent 55%);
+
+    --map-stroke: rgba(0, 0, 0, 0.95);
   }
 
   #social .button-icon {

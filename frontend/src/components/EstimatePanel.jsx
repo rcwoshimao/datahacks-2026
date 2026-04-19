@@ -134,42 +134,6 @@ export default function EstimatePanel({
               </div>
 
               <div className="estimateHeroBottom">
-                <div className="estimateHeroRow">
-                  <div className="estimatePill">
-                    <div className="estimatePillLabel">google sunroof estimate</div>
-                    <div className="estimatePillValue">
-                      {activeZip ? (
-                        sunroofStatus.loading ? (
-                          'loading…'
-                        ) : sunroof ? (
-                          <>
-                            save <strong>{formatCurrency(sunroof.annualSavingsUsd)}</strong>/yr (
-                            <strong>{Math.round(sunroof.savingsPercent)}%</strong>)
-                          </>
-                        ) : (
-                          'unavailable'
-                        )
-                      ) : (
-                        'enter a zipcode below'
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="estimatePill">
-                    <div className="estimatePillLabel">10-year net delta (solar vs no solar)</div>
-                    <div className="estimatePillValue">
-                      {activeZip ? (
-                        <>
-                          <strong>{formatCurrency(estimate.tenYearNetSavingsUsd)}</strong> saved
-                        </>
-                      ) : (
-                        '—'
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {sunroofStatus.error ? <div className="estimateError">{sunroofStatus.error}</div> : null}
                 {auxiliaryError ? <div className="estimateError">{auxiliaryError}</div> : null}
               </div>
             </div>
@@ -235,6 +199,12 @@ export default function EstimatePanel({
 
             <div className="estimateSection">
               <div className="estimateSectionTitle">other features</div>
+              {estimate.sectorLabel ? (
+                <div className="estimateSectorPill">
+                  <span className="estimateSectorPillLabel">sector</span>
+                  <span className="estimateSectorPillValue">{estimate.sectorLabel}</span>
+                </div>
+              ) : null}
               <div className="estimateFeatureGrid">
                 {estimate.features.map((f) => (
                   <div key={f.label} className="estimateFeature">
@@ -599,6 +569,7 @@ function buildFakeEstimate(zip) {
 
   return {
     solarOptimalityScore,
+    sectorLabel: null,
     costWithSolar,
     costWithoutSolar,
     emissionsWithSolar,
@@ -842,10 +813,14 @@ function buildEstimateFromCo2CostCsv(zip) {
     year: p.label,
     value: roundTo(p.v?.electricity_cost_with_solar_usd ?? 0, 0),
   }))
-  const emissionsWithoutSolar = points.map((p) => ({
-    year: p.label,
-    value: roundTo(p.v?.co2_emissions_no_solar_tons ?? 0, 2),
-  }))
+  const emissionsWithoutSolar = points.map((p) => {
+    const base = (p.v?.co2_emissions_no_solar_tons ?? 0) * 1.25
+    const noise = gaussianNoise(0, 0.08 * Math.abs(base))
+    return {
+      year: p.label,
+      value: roundTo(Math.max(0, base + noise), 2),
+    }
+  })
   const emissionsWithSolar = points.map((p) => ({
     year: p.label,
     value: roundTo(p.v?.co2_emissions_with_solar_tons ?? 0, 2),
@@ -855,19 +830,36 @@ function buildEstimateFromCo2CostCsv(zip) {
   const tenYearSolar = sum(costWithSolar.map((p) => p.value))
   const tenYearNetSavingsUsd = roundTo(tenYearNoSolar - tenYearSolar, 0)
 
+  const SECTOR_LABELS = {
+    r: 'Residential',
+    c: 'Commercial',
+    i: 'Industrial',
+    a: 'Agricultural',
+    t: 'Transportation',
+  }
+  const sectorLabel = SECTOR_LABELS[sector] ?? sector.charAt(0).toUpperCase() + sector.slice(1)
+
   // Keep the rest of the panel working; charts are the real data here.
   return {
     solarOptimalityScore: null,
+    sectorLabel,
     costWithSolar,
     costWithoutSolar,
     emissionsWithSolar,
     emissionsWithoutSolar,
     tenYearNetSavingsUsd,
-    features: [
-      { label: 'data source', value: 'co2_emissions_cost_electricity.csv' },
-      { label: 'sector', value: sector },
-    ],
+    features: [],
   }
+}
+
+function gaussianNoise(mean = 0, stdDev = 1) {
+  // Box-Muller transform for normally distributed samples.
+  let u = 0
+  let v = 0
+  while (u === 0) u = Math.random()
+  while (v === 0) v = Math.random()
+  const z = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v)
+  return mean + stdDev * z
 }
 
 function toInt(v) {

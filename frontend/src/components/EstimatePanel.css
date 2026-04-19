@@ -216,6 +216,27 @@
   line-height: 1.25;
 }
 
+.estimateSectorPill {
+  background: #ffd6ff;
+  border-radius: 12px;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.estimateSectorPillLabel {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.estimateSectorPillValue {
+  font-size: 13px;
+  font-weight: 650;
+}
+
 .estimateSection {
   display: grid;
   gap: 10px;

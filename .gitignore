@@ -16,6 +16,7 @@
 .env.*
 !.env.example
 .venv/
+.vercel-test/
 
 # Data downloads
 # data/

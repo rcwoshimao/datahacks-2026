@@ -1,6 +1,7 @@
 # datahacks-2026
-Team repo for datahacks 2026 
+[Project demo](https://datahacks-2026-iota.vercel.app/)
 
+Team repo for datahacks 2026 
 ## Frontend (React)
 
 The React frontend lives in `frontend/` (Vite + React).

@@ -1,6 +1,5 @@
+# [Project demo](https://datahacks-2026-iota.vercel.app/)
 # datahacks-2026
-[Project demo](https://datahacks-2026-iota.vercel.app/)
-
 Team repo for datahacks 2026 
 ## Frontend (React)
 
